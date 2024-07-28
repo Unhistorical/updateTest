@@ -34,6 +34,7 @@ public class Main extends Application {
 	 * This is the folder where the update will take place [ obviously the
 	 * parent folder of the application]
 	 */
+	//new File(InfoTool.getBasePathForClass(Main.class));
 	private File updateFolder = new File(InfoTool.getBasePathForClass(Main.class));
 	
 	/**
@@ -127,7 +128,7 @@ public class Main extends Application {
 		window.show();
 		
 		//Start
-		prepareForUpdate("XR3Player");
+		prepareForUpdate(applicationName);
 	}
 	
 	//-------------------------------------------------------------------------------------------------------------------------------
@@ -147,7 +148,8 @@ public class Main extends Application {
 		//Check the Permissions
 		if (checkPermissions()) {
 			downloadMode.getProgressLabel().setText("Checking permissions");
-			downloadUpdate("https://github.com/goxr3plus/XR3Player/releases/download/V3." + update + "/XR3Player.Update." + update + ".zip");
+			//downloadUpdate("https://github.com/goxr3plus/XR3Player/releases/download/V3." + update + "/XR3Player.Update." + update + ".zip");
+			downloadUpdate("https://github.com/Unhistorical/updaterTest/releases/download/Updates/updaterTest1.zip");
 		} else {
 			
 			//Update
@@ -181,7 +183,7 @@ public class Main extends Application {
 			//Error message shown to user. Operation is aborted
 			return false;
 		}
-		
+
 		//Also check for Read and Write Permissions
 		return updateFolder.canRead() && updateFolder.canWrite();
 	}
@@ -281,6 +283,7 @@ public class Main extends Application {
 		// Restart XR3Player
 		new Thread(() -> {
 			String path = InfoTool.getBasePathForClass(Main.class);
+			System.out.println("Path from 'restartApplication()': " + path);
 			String[] applicationPath = { new File(path + appName + ".jar").getAbsolutePath() };
 			
 			//Show message that application is restarting

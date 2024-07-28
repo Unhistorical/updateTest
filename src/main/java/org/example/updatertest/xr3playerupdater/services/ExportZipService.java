@@ -106,69 +106,71 @@ public class ExportZipService extends Service<Boolean> {
 		return new Task<Boolean>() {
 			@Override
 			protected Boolean call() throws Exception {
-				
+
 				//---------------------Move on Importing the Database-----------------------------------------------
-				
+
 				// get the zip file content
 				try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
-					
-					// create output directory is not exists
+
+					// create output directory if it does not exist
 					File folder = new File(destinationFolder);
 					if (!folder.exists())
 						folder.mkdir();
-					
+
 					// get the zipped file list entry
 					ZipEntry ze = zis.getNextEntry();
-					
+
 					// Count entries
 					ZipFile zip = new ZipFile(zipFile);
-					double counter = 0 , total = zip.size();
-					
-					//Start
-					for (byte[] buffer = new byte[1024]; ze != null;) {
-						
+					double counter = 0, total = zip.size();
+
+					// Start
+					while (ze != null) {
 						String fileName = ze.getName();
 						File newFile = new File(destinationFolder + File.separator + fileName);
-						
-						// Refresh the dataLabel text
-						updateMessage("Exporting: [ " + newFile.getName() + " ]");
-						
-						// create all non exists folders else you will hit FileNotFoundException for compressed folder
-						new File(newFile.getParent()).mkdirs();
-						
-						//Create File OutputStream
-						try (FileOutputStream fos = new FileOutputStream(newFile)) {
-							
-							// Copy byte by byte
-							int len;
-							while ( ( len = zis.read(buffer) ) > 0)
-								fos.write(buffer, 0, len);
-							
-						} catch (IOException ex) {
-							exception = ex.getMessage();
-							logger.log(Level.WARNING, "", ex);
+
+						if (ze.isDirectory()) {
+							// Create directories for folder entries
+							newFile.mkdirs();
+						} else {
+							// Refresh the dataLabel text
+							updateMessage("Exporting: [ " + newFile.getName() + " ]");
+
+							// create all non-exists folders else you will hit FileNotFoundException for compressed folder
+							new File(newFile.getParent()).mkdirs();
+
+							// Create File OutputStream
+							try (FileOutputStream fos = new FileOutputStream(newFile)) {
+								// Copy byte by byte
+								byte[] buffer = new byte[1024];
+								int len;
+								while ((len = zis.read(buffer)) > 0)
+									fos.write(buffer, 0, len);
+							} catch (IOException ex) {
+								exception = ex.getMessage();
+								logger.log(Level.WARNING, "", ex);
+							}
 						}
-						
-						//Get next entry
+
+						// Get next entry
 						ze = zis.getNextEntry();
-						
-						//Update the progress
+
+						// Update the progress
 						updateProgress(++counter / total, 1);
 					}
-					
+
 					zis.closeEntry();
-					zis.close();
 					zip.close();
-					
+
 				} catch (IOException ex) {
 					exception = ex.getMessage();
 					logger.log(Level.WARNING, "", ex);
 					return false;
 				}
-				
+
 				return true;
 			}
-			
 		};
 	}
+
 }
